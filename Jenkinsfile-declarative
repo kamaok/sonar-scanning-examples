@@ -1,0 +1,29 @@
+pipeline {
+  agent any
+
+  options {
+    buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '3')
+    disableConcurrentBuilds()
+  }
+
+   triggers {
+     bitbucketPush()
+  }
+
+  stages {
+
+/*    stage('Checkout') {
+      steps {
+        git(url: 'git@github.com:kamaok/sonar-scanning-examples.git', branch: 'master', credentialsId: 'jenkins-user-ssh-key')
+        }
+      }
+*/
+    stage ('Sonar analysis') {
+      steps {
+          withSonarQubeEnv('my-sonarqube-demo') {
+	  sh "'/opt/sonar-runner/bin/sonar-runner' -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_AUTH_TOKEN"
+        }
+      }
+    }
+  }
+}
